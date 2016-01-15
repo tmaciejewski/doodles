@@ -32,15 +32,20 @@ def cspline(control_points, degree = 3):
     if len(control_points) < degree:
         return control_points
 
-    for t in np.linspace(knots[degree], knots[-degree], len(control_points) * 10):
-        basis = cspline_basis(knots, degree, t)
-        sum_x = 0
-        sum_y = 0
-        for i in range(len(control_points)):
-            sum_x += control_points[i][0] * basis[i]
-            sum_y += control_points[i][1] * basis[i]
+    start_time = time.time()
 
-        curve.append((sum_x, sum_y))
+    for i in range(degree, len(knots) - degree):
+        for t in np.linspace(knots[i], knots[i + 1], 10):
+            basis = cspline_basis(knots, degree, t)
+            sum_x = 0
+            sum_y = 0
+            for j in range(i - degree, len(control_points))[:degree+1]:
+                sum_x += control_points[j][0] * basis[j]
+                sum_y += control_points[j][1] * basis[j]
+
+            curve.append((sum_x, sum_y))
+
+    print time.time() - start_time
 
     return curve
 
