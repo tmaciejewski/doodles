@@ -10,35 +10,35 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 
-def cspline_basis(knots, i, j, t):
-    if j == 0:
+def cspline_basis(knots, degree, t):
+    current_basis = [0] * (len(knots) - 1)
+
+    for i in range(len(knots) - 1):
         if knots[i] <= t < knots[i + 1]:
-            return 1
-        else:
-            return 0
-    else:
-        base_a = cspline_basis(knots, i, j - 1, t)
-        base_b = cspline_basis(knots, i + 1, j - 1, t)
+            current_basis[i] = 1
 
-        a = base_a * (t - knots[i]) / (knots[i + j] - knots[i])
-        b = base_b * (knots[i + j + 1] - t) / (knots[i + j + 1] - knots[i + 1])
+    for j in range(1, degree + 1):
+        for i in range(len(current_basis) - j):
+            a = current_basis[i] * (t - knots[i]) / (knots[i + j] - knots[i])
+            b = current_basis[i + 1] * (knots[i + j + 1] - t) / (knots[i + j + 1] - knots[i + 1])
+            current_basis[i] = a + b
 
-        return a + b
+    return current_basis
 
-def cspline(control_points, p = 3):
+def cspline(control_points, degree = 3):
     curve = []
-    knots = np.linspace(0, 1, len(control_points) + p + 1)
+    knots = np.linspace(0, 1, len(control_points) + degree + 1)
 
-    if len(control_points) < p:
+    if len(control_points) < degree:
         return control_points
 
-    for t in np.linspace(knots[p], knots[-p], 100):
+    for t in np.linspace(knots[degree], knots[-degree], len(control_points) * 10):
+        basis = cspline_basis(knots, degree, t)
         sum_x = 0
         sum_y = 0
         for i in range(len(control_points)):
-            basis = cspline_basis(knots, i, p, t)
-            sum_x += control_points[i][0] * basis
-            sum_y += control_points[i][1] * basis
+            sum_x += control_points[i][0] * basis[i]
+            sum_y += control_points[i][1] * basis[i]
 
         curve.append((sum_x, sum_y))
 
