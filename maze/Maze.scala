@@ -43,37 +43,30 @@ class Maze(width: Int, height: Int) {
         visitNode(0)
     }
 
-    override def toString = {
-        var result = "#" * width * 2 + "\n"
-        var downLinks = ""
+    def mkString = {
+        def makeRow(nodes: List[Int]) = "#." + nodes.tail.map(node =>
+            if (isMazeLink(node, node - 1))
+                ".."
+            else
+                "#."
+        ).mkString + "#"
 
-        for (node <- List.range(0, totalNodes)) {
-            val x = node % width
-            val y = node / width
+        def makeInterRow(nodes: List[Int]) = "#" + nodes.map(node =>
+            if (isMazeLink(node, node - width))
+                ".#"
+            else
+                "##"
+        ).mkString
 
-            if (x > 0) {
-                if (isMazeLink(node, node - 1))
-                    result += ".."
-                else
-                    result += "#."
-
-            } else {
-                if (y > 0) {
-                    result += "#\n" + downLinks + "\n"
-                    downLinks = ""
-                }
-                result += "."
-            }
-
-            if (y < height - 1) {
-                if (isMazeLink(node, node + width))
-                    downLinks += ".#"
-                else
-                    downLinks += "##"
-            }
+        val rowStarts = List.range(0, totalNodes, width)
+        val firstRow = makeRow(List.range(rowStarts.head, rowStarts.head + width))
+        val tailRows = rowStarts.tail flatMap {start =>
+            val row = List.range(start, start + width)
+            List(makeInterRow(row), makeRow(row))
         }
 
-        result + "#\n" + "#" * width * 2 + "\n"
+        val border = "#" * width * 2 + "#"
+        border + "\n" + (firstRow :: tailRows).mkString("\n") + "\n" + border
     }
 }
 
