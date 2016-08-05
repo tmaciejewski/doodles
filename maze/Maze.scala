@@ -4,14 +4,14 @@ package maze {
 
 class Maze(width: Int, height: Int) {
 
-    val totalNodes = width * height
-    var mazeLinks = new Array[Boolean](totalNodes * totalNodes)
+    private val totalNodes = width * height
+    private var mazeLinks = new Array[Boolean](totalNodes * totalNodes)
 
-    def addMazeLink(node1: Int, node2: Int) = mazeLinks(node1 + node2 * totalNodes) = true
-    
-    def isMazeLink(node1: Int, node2: Int) = mazeLinks(node1 + node2 * totalNodes) 
+    private def addMazeLink(node1: Int, node2: Int) = mazeLinks(node1 + node2 * totalNodes) = true
 
-    def neighbors(node: Int) = {
+    private def isMazeLink(node1: Int, node2: Int) = mazeLinks(node1 + node2 * totalNodes) 
+
+    private def neighbors(node: Int) = {
         val x = node % width
         val y = node / width
 
