@@ -4,12 +4,16 @@ package maze {
 
 class Maze(width: Int, height: Int) {
 
+    def getWidth = width
+
+    def getHeight = height
+
     private val totalNodes = width * height
     private var mazeLinks = new Array[Boolean](totalNodes * totalNodes)
 
     private def addMazeLink(node1: Int, node2: Int) = mazeLinks(node1 + node2 * totalNodes) = true
 
-    private def isMazeLink(node1: Int, node2: Int) = mazeLinks(node1 + node2 * totalNodes) 
+    def isMazeLink(node1: Int, node2: Int) = mazeLinks(node1 + node2 * totalNodes)
 
     private def neighbors(node: Int) = {
         val x = node % width
@@ -41,32 +45,6 @@ class Maze(width: Int, height: Int) {
         }
 
         visitNode(0)
-    }
-
-    def mkString = {
-        def makeRow(nodes: List[Int]) = "#." + nodes.tail.map(node =>
-            if (isMazeLink(node, node - 1))
-                ".."
-            else
-                "#."
-        ).mkString + "#"
-
-        def makeInterRow(nodes: List[Int]) = "#" + nodes.map(node =>
-            if (isMazeLink(node, node - width))
-                ".#"
-            else
-                "##"
-        ).mkString
-
-        val rowStarts = List.range(0, totalNodes, width)
-        val firstRow = makeRow(List.range(rowStarts.head, rowStarts.head + width))
-        val tailRows = rowStarts.tail flatMap {start =>
-            val row = List.range(start, start + width)
-            List(makeInterRow(row), makeRow(row))
-        }
-
-        val border = "#" * width * 2 + "#"
-        border + "\n" + (firstRow :: tailRows).mkString("\n") + "\n" + border
     }
 }
 
