@@ -3,9 +3,8 @@ import maze.Maze
 object MazeMain {
     def printMaze(m: Maze) = {
 
-        val width = m.getWidth
-        val totalNodes = m.getWidth * m.getHeight
-        val rowStarts = List.range(0, totalNodes, width)
+        val totalNodes = m.width * m.height
+        val rowStarts = List.range(0, totalNodes, m.width)
 
         def printLinkRight = print("..")
 
@@ -31,7 +30,7 @@ object MazeMain {
         def printInterRow(nodes: List[Int]) = {
             print("#")
             nodes foreach (node =>
-                if (m.isMazeLink(node, node - width))
+                if (m.isMazeLink(node, node - m.width))
                     printLinkDown
                 else
                     printBlockedDown
@@ -39,14 +38,14 @@ object MazeMain {
             println
         }
 
-        printBorder(width)
-        printRow(List.range(rowStarts.head, rowStarts.head + width))
+        printBorder(m.width)
+        printRow(List.range(rowStarts.head, rowStarts.head + m.width))
         rowStarts.tail foreach {start =>
-            val row = List.range(start, start + width)
+            val row = List.range(start, start + m.width)
             printInterRow(row)
             printRow(row)
         }
-        printBorder(width)
+        printBorder(m.width)
     }
 
     def main(args: Array[String]): Unit = {

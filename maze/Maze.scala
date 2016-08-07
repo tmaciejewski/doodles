@@ -2,11 +2,7 @@ import scala.util.Random
 
 package maze {
 
-class Maze(width: Int, height: Int) {
-
-    def getWidth = width
-
-    def getHeight = height
+class Maze(val width: Int, val height: Int) {
 
     private val totalNodes = width * height
     private var mazeLinks = new Array[Boolean](totalNodes * totalNodes)
