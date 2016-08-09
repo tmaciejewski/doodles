@@ -2,10 +2,6 @@ import maze.Maze
 
 object MazeMain {
     def printMaze(m: Maze) = {
-
-        val totalNodes = m.width * m.height
-        val rowStarts = List.range(0, totalNodes, m.width)
-
         def printLinkRight = print("..")
 
         def printBlockedRight = print("#.")
@@ -16,32 +12,35 @@ object MazeMain {
 
         def printBorder(width: Int) = println("#" * width * 2 + "#")
 
-        def printRow(nodes: List[Int]) = {
+        def printRow(row: List[(Int, Int)]) = {
             print("#.")
-            nodes.tail foreach (node =>
-                if (m.isMazeLink(node, node - 1))
+            row.tail foreach {case (x, y) =>
+                if (m.adjRooms(x, y) contains (x - 1, y))
                     printLinkRight
                 else
                     printBlockedRight
-            )
+            }
             println("#")
         }
 
-        def printInterRow(nodes: List[Int]) = {
+        def printInterRow(row: List[(Int, Int)]) = {
             print("#")
-            nodes foreach (node =>
-                if (m.isMazeLink(node, node - m.width))
+            row foreach {case (x, y) =>
+                if (m.adjRooms(x, y) contains (x, y - 1))
                     printLinkDown
                 else
                     printBlockedDown
-            )
+            }
             println
         }
 
+        val rows = for (y <- List.range(0, m.height))
+                     yield for (x <- List.range(0, m.width))
+                       yield (x, y)
+
         printBorder(m.width)
-        printRow(List.range(rowStarts.head, rowStarts.head + m.width))
-        rowStarts.tail foreach {start =>
-            val row = List.range(start, start + m.width)
+        printRow(rows.head)
+        rows.tail foreach {row =>
             printInterRow(row)
             printRow(row)
         }
