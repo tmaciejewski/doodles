@@ -1,40 +1,36 @@
 object Calculator {
     def main(args: Array[String]): Unit = {
-        val line = io.StdIn.readLine()
-        if (line != null) {
-            val tokens = line.split("\\s+") map (parseToken)
-            val rpnForm = toRPN(tokens.toList)
-            println(evalRPN(rpnForm))
-            main(args)
-        }
+        val tokens = args.head.split("\\s+").map(parseToken)
+        val rpnForm = toRPN(tokens.toList)
+        println(evalRPN(rpnForm))
     }
 
     trait Token
 
     trait BinaryOp extends Token {
         def priority: Int
-        def fun(x: Int, y: Int): Int
+        def apply(x: Int, y: Int): Int
     }
 
     object Add extends BinaryOp {
         def priority = 2
-        def fun(x: Int, y: Int) = x + y
+        def apply(x: Int, y: Int) = x + y
         override def toString = "+"
     }
 
     object Sub extends BinaryOp {
         def priority = 2
-        def fun(x: Int, y: Int) = x - y
+        def apply(x: Int, y: Int) = x - y
         override def toString = "-"
     }
     object Mul extends BinaryOp {
         def priority = 1
-        def fun(x: Int, y: Int) = x * y
+        def apply(x: Int, y: Int) = x * y
         override def toString = "*"
     }
     object Div extends BinaryOp {
         def priority = 1
-        def fun(x: Int, y: Int) = x / y
+        def apply(x: Int, y: Int) = x / y
         override def toString = "/"
     }
     case class Number(value: Int) extends Token {
@@ -72,7 +68,7 @@ object Calculator {
         case (oper: BinaryOp) :: otherTokens => {
             val arg2 = stack.head
             val arg1 = stack.tail.head
-            val res = oper.fun(arg1, arg2)
+            val res = oper(arg1, arg2)
             evalRPN(otherTokens, res :: stack.tail.tail)
         }
         case _ :: otherTokens => evalRPN(otherTokens, stack)
