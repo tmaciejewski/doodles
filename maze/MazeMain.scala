@@ -5,45 +5,68 @@ import maze._
 
 object MazeMain {
 
-    var m: Maze = null
+    var m: Maze = _
     var playerX = 0
     var playerY = 0
 
     def main(args: Array[String]): Unit = {
         val server = new ServerSocket(9999)
-        val client = server.accept()
 
-        val width = args(0).toInt
-        val height = args(1).toInt
-        m = new MazeDFS(width, height)
+        val maxWidth = args(0).toInt
+        val maxHeight = args(1).toInt
+
+        m = new MazeDFS(maxWidth, maxHeight)
         m.generate
 
-        mainLoop(client.getInputStream(), client.getOutputStream())
+        handleGames(server)
     }
 
-    def mainLoop(in: InputStream, out: OutputStream): Unit = {
-        printMaze(out)
+    def handleGames(server: ServerSocket): Unit = {
+        try {
+            println("waiting for new client")
+            val client = server.accept()
+            println("new client has connected")
+
+            sendMaze(client.getOutputStream())
+            gameLoop(client.getInputStream(), client.getOutputStream())
+
+            println("client disconnected")
+        } catch {
+            case _ : java.net.SocketException => println("connection error")
+        }
+
+        handleGames(server)
+    }
+
+    def sendMaze(out: OutputStream) = {
+        val buffered = new BufferedOutputStream(out)
+        buffered.write(m.width)
+        buffered.write(m.height)
+        List.range(0, m.height) foreach {y =>
+            List.range(0, m.width) foreach {x =>
+                if (m.isWall(x, y))
+                    buffered.write(1)
+                else
+                    buffered.write(0)
+            }
+        }
+        buffered.flush()
+    }
+
+    def gameLoop(in: InputStream, out: OutputStream): Unit = {
+        sendPlayerPosition(out)
         val command = in.read()
         if (command > 0) {
             processCommand(command.toChar)
-            mainLoop(in, out)
+            gameLoop(in, out)
         }
     }
 
-    def printMaze(out: OutputStream): Unit = {
+    def sendPlayerPosition(out: OutputStream) = {
         val buffered = new BufferedOutputStream(out)
-        List.range(0, m.height) foreach {y =>
-            List.range(0, m.width) foreach {x =>
-                if (x == playerX && y == playerY)
-                    out.write('@')
-                else if (m.isWall(x, y))
-                    out.write('#')
-                else
-                    out.write('.')
-            }
-            out.write('\n')
-        }
-        out.flush()
+        buffered.write(playerX)
+        buffered.write(playerY)
+        buffered.flush()
     }
 
     def processCommand(command: Char) = command match {
