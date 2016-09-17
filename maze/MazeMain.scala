@@ -16,7 +16,6 @@ object MazeMain {
         val maxHeight = args(1).toInt
 
         m = new MazeDFS(maxWidth, maxHeight)
-        m.generate
 
         handleGames(server)
     }
@@ -26,6 +25,10 @@ object MazeMain {
             println("waiting for new client")
             val client = server.accept()
             println("new client has connected")
+
+            playerX = 0
+            playerY = 0
+            m.generate
 
             sendMaze(client.getOutputStream())
             gameLoop(client.getInputStream(), client.getOutputStream())
