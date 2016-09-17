@@ -21,18 +21,22 @@ class MazeDFS(maxWidth: Int, maxHeight: Int) extends Maze {
     def generate: Unit = {
         var visited = new Array[Boolean](graphSize)
 
-        def visitNode(node: Int): Unit = {
-            visited(node) = true
-            val nextNodes = Random.shuffle(neighbors(node))
-            nextNodes foreach { nextNode =>
-                if (!visited(nextNode)) {
-                    addGraphLink(node, nextNode)
-                    visitNode(nextNode)
+        graphLinks = new Array[Boolean](graphSize * graphSize)
+
+        def visitNode(nodes: List[(Int, Int)]): Unit = nodes match {
+            case Nil => ()
+            case (prevNode, node) :: restNodes =>
+                if (!visited(node)) {
+                    visited(node) = true
+                    addGraphLink(prevNode, node)
+                    val nextNodes = Random.shuffle(neighbors(node)) map (n => (node, n))
+                    visitNode(nextNodes ::: restNodes)
+                } else {
+                    visitNode(restNodes)
                 }
-            }
         }
 
-        visitNode(0)
+        visitNode(List((0, 0)))
     }
 
     def isWall(x: Int, y: Int): Boolean = {
