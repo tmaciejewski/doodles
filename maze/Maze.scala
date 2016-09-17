@@ -21,7 +21,7 @@ class MazeDFS(maxWidth: Int, maxHeight: Int) extends Maze {
     def generate: Unit = {
         var visited = new Array[Boolean](graphSize)
 
-        graphLinks = new Array[Boolean](graphSize * graphSize)
+        graphLinks = new Array[List[Int]](graphSize)
 
         def visitNode(nodes: List[(Int, Int)]): Unit = nodes match {
             case Nil => ()
@@ -59,12 +59,21 @@ class MazeDFS(maxWidth: Int, maxHeight: Int) extends Maze {
     }
 
     private val graphSize = graphWidth * graphHeight
-    private var graphLinks = new Array[Boolean](graphSize * graphSize)
+    private var graphLinks = new Array[List[Int]](graphSize)
 
     private def addGraphLink(node1: Int, node2: Int): Unit = {
-        graphLinks(node1 + node2 * graphSize) = true
-        graphLinks(node2 + node1 * graphSize) = true
+        if (graphLinks(node1) != null)
+            graphLinks(node1) = node2 :: graphLinks(node1)
+        else
+            graphLinks(node1) = List(node2)
+
+        if (graphLinks(node2) != null)
+            graphLinks(node2) = node1 :: graphLinks(node2)
+        else
+            graphLinks(node2) = List(node1)
     }
+
+    private def isGraphLink(node1: Int, node2: Int) = graphLinks(node1) contains node2
 
     private def neighbors(node: Int): List[Int] = {
         val x = node % graphWidth
@@ -82,8 +91,6 @@ class MazeDFS(maxWidth: Int, maxHeight: Int) extends Maze {
 
     private def adjRooms(x: Int, y: Int): List[(Int, Int)] = {
         val node = x + y * graphWidth
-
-        def isGraphLink(node1: Int, node2: Int) = graphLinks(node1 + node2 * graphSize)
 
         for (adj_node <- neighbors(node) if isGraphLink(node, adj_node))
             yield (adj_node % graphWidth, adj_node / graphWidth)
