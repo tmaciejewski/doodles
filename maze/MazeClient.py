@@ -16,28 +16,21 @@ class Game:
         self.width = ord(self.socket.recv(1)[0])
         self.height = ord(self.socket.recv(1)[0])
 
-        print 'maze', self.width, 'x', self.height
-
         self.maze = []
 
         for _ in range(self.height):
             row = [ord(x) for x in self.socket.recv(self.width)]
             self.maze.append(row)
 
-        print 'received maze'
-
     def receive_position(self):
         self.playerX = ord(self.socket.recv(1)[0])
         self.playerY = ord(self.socket.recv(1)[0])
-
-        print 'player position:', self.playerX, self.playerY
 
     def on_key_press(self, widget, event):
         if event.string == 'q':
             gtk.main_quit()
 
         if event.string != '':
-            print 'sending', event.string
             self.socket.send(event.string[0])
             self.receive_position()
             widget.queue_draw()
@@ -50,7 +43,6 @@ class Screen(gtk.DrawingArea):
     def __init__(self, game):
         super(Screen, self).__init__()
         self.game = game
-        self.maze = [0,1,1,0,1,0,0,1]
 
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
@@ -66,13 +58,12 @@ class Screen(gtk.DrawingArea):
         self.draw(cr, *self.window.get_size())
 
     def draw(self, cr, width, height):
-        print 'drawing'
         scaleWidth = width / self.game.width
         scaleHeight = height / self.game.height
 
         cr.set_source_rgb(0.6, 0.3, 0.8)
         cr.arc(game.playerX * scaleWidth + scaleWidth / 2,
-               game.playerY * scaleHeight + scaleWidth / 2,
+               game.playerY * scaleHeight + scaleHeight / 2,
                (scaleWidth + scaleHeight) / 6, 0, 3.14 * 2)
         cr.fill()
         cr.set_source_rgb(0.3, 0.3, 0.3)
