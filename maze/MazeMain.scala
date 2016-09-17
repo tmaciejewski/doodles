@@ -42,18 +42,18 @@ object MazeMain {
     }
 
     def sendMaze(out: OutputStream) = {
-        val buffered = new BufferedOutputStream(out)
-        buffered.write(m.width)
-        buffered.write(m.height)
+        val stream = new DataOutputStream(new BufferedOutputStream(out))
+        stream.writeInt(m.width)
+        stream.writeInt(m.height)
         List.range(0, m.height) foreach {y =>
             List.range(0, m.width) foreach {x =>
                 if (m.isWall(x, y))
-                    buffered.write(1)
+                    stream.write(1)
                 else
-                    buffered.write(0)
+                    stream.write(0)
             }
         }
-        buffered.flush()
+        stream.flush()
     }
 
     def gameLoop(in: InputStream, out: OutputStream): Unit = {
@@ -66,10 +66,11 @@ object MazeMain {
     }
 
     def sendPlayerPosition(out: OutputStream) = {
-        val buffered = new BufferedOutputStream(out)
-        buffered.write(playerX)
-        buffered.write(playerY)
-        buffered.flush()
+        println("Sending player pos: " + playerX + " " + playerY)
+        val stream = new DataOutputStream(new BufferedOutputStream(out))
+        stream.writeInt(playerX)
+        stream.writeInt(playerY)
+        stream.flush()
     }
 
     def processCommand(command: Char) = command match {

@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import socket
+import struct
 import pygtk
 pygtk.require('2.0')
 import gtk, gobject, cairo
@@ -13,8 +14,8 @@ class Game:
         self.receive_position()
 
     def receive_maze(self):
-        self.width = ord(self.socket.recv(1)[0])
-        self.height = ord(self.socket.recv(1)[0])
+        self.width = struct.unpack('!I', self.socket.recv(4))[0]
+        self.height = struct.unpack('!I', self.socket.recv(4))[0]
 
         self.maze = []
 
@@ -23,8 +24,8 @@ class Game:
             self.maze.append(row)
 
     def receive_position(self):
-        self.playerX = ord(self.socket.recv(1)[0])
-        self.playerY = ord(self.socket.recv(1)[0])
+        self.playerX = struct.unpack('!I', self.socket.recv(4))[0]
+        self.playerY = struct.unpack('!I', self.socket.recv(4))[0]
 
     def on_key_press(self, widget, event):
         if event.string == 'q':
