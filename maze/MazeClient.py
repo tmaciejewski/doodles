@@ -67,7 +67,12 @@ class Screen(gtk.DrawingArea):
                game.playerY * scaleHeight + scaleHeight / 2,
                (scaleWidth + scaleHeight) / 6, 0, 3.14 * 2)
         cr.fill()
+
+        cr.set_line_width(5.0)
         cr.set_source_rgb(0.3, 0.3, 0.3)
+        cr.rectangle(0, 0, scaleWidth * self.game.width, scaleHeight * self.game.height)
+        cr.stroke()
+
         for y in range(len(self.game.maze)):
             for x in range(len(self.game.maze[y])):
                 if self.game.maze[y][x]:
