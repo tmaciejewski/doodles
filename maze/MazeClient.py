@@ -23,6 +23,9 @@ class Game:
             row = [ord(x) for x in self.socket.recv(self.width)]
             self.maze.append(row)
 
+        self.exitX = struct.unpack('!I', self.socket.recv(4))[0]
+        self.exitY = struct.unpack('!I', self.socket.recv(4))[0]
+
     def receive_position(self):
         self.playerX = struct.unpack('!I', self.socket.recv(4))[0]
         self.playerY = struct.unpack('!I', self.socket.recv(4))[0]
@@ -35,6 +38,13 @@ class Game:
             self.socket.send(event.string[0])
             self.receive_position()
             widget.queue_draw()
+
+        if self.playerX == self.exitX and self.playerY == self.exitY:
+            md = gtk.MessageDialog(widget,
+                                   gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO,
+                                   gtk.BUTTONS_CLOSE, "You won!")
+            md.run()
+            gtk.main_quit()
 
 class Screen(gtk.DrawingArea):
 
@@ -61,18 +71,30 @@ class Screen(gtk.DrawingArea):
     def draw(self, cr, width, height):
         scaleWidth = width / self.game.width
         scaleHeight = height / self.game.height
+        borderWidth = (scaleHeight + scaleWidth) / 4
 
+        # exit
+        cr.set_source_rgb(0.8, 0.9, 0.1)
+        cr.arc(game.exitX * scaleWidth + scaleWidth / 2,
+               game.exitY * scaleHeight + scaleHeight / 2,
+               (scaleWidth + scaleHeight) / 6, 0, 3.14 * 2)
+        cr.fill()
+
+        # player
         cr.set_source_rgb(0.6, 0.3, 0.8)
         cr.arc(game.playerX * scaleWidth + scaleWidth / 2,
                game.playerY * scaleHeight + scaleHeight / 2,
                (scaleWidth + scaleHeight) / 6, 0, 3.14 * 2)
         cr.fill()
 
-        cr.set_line_width(5.0)
+        # border
+        cr.set_line_width(borderWidth)
         cr.set_source_rgb(0.3, 0.3, 0.3)
-        cr.rectangle(0, 0, scaleWidth * self.game.width, scaleHeight * self.game.height)
+        cr.rectangle(0 - borderWidth, 0 - borderWidth, scaleWidth * self.game.width + 1.5 * borderWidth,
+                     scaleHeight * self.game.height + 1.5 * borderWidth)
         cr.stroke()
 
+        # maze
         for y in range(len(self.game.maze)):
             for x in range(len(self.game.maze[y])):
                 if self.game.maze[y][x]:

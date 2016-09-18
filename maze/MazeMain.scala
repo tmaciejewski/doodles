@@ -8,6 +8,8 @@ object MazeMain {
     var m: Maze = _
     var playerX = 0
     var playerY = 0
+    var exitX = 0
+    var exitY = 0
 
     def main(args: Array[String]): Unit = {
         val server = new ServerSocket(9999)
@@ -22,23 +24,29 @@ object MazeMain {
 
     def handleGames(server: ServerSocket): Unit = {
         try {
-            println("waiting for new client")
+            println("waiting for new player")
             val client = server.accept()
-            println("new client has connected")
+            println("new player has connected")
 
-            playerX = 0
-            playerY = 0
-            m.generate
-
+            initGame()
             sendMaze(client.getOutputStream())
             gameLoop(client.getInputStream(), client.getOutputStream())
-
-            println("client disconnected")
+            client.close()
         } catch {
             case _ : java.net.SocketException => println("connection error")
         }
 
         handleGames(server)
+    }
+
+    def initGame() = {
+        m.generate
+        playerX = 0
+        playerY = 0
+
+        exitX = m.width -1
+        val exits = List.range(0, m.height).filter(y => !m.isWall(exitX, y)).reverse
+        exitY = exits.head
     }
 
     def sendMaze(out: OutputStream) = {
@@ -53,15 +61,24 @@ object MazeMain {
                     stream.write(0)
             }
         }
+        stream.writeInt(exitX)
+        stream.writeInt(exitY)
         stream.flush()
     }
 
     def gameLoop(in: InputStream, out: OutputStream): Unit = {
         sendPlayerPosition(out)
-        val command = in.read()
-        if (command > 0) {
-            processCommand(command.toChar)
-            gameLoop(in, out)
+
+        if (playerX == exitX && playerY == exitY) {
+            println("player won")
+        } else {
+            val command = in.read()
+            if (command > 0) {
+                processCommand(command.toChar)
+                gameLoop(in, out)
+            } else {
+                println("player disconnected")
+            }
         }
     }
 
